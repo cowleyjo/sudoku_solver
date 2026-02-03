@@ -18,7 +18,5 @@ def api_call(difficulty: str = "easy", solution: bool = True, array: bool = True
     data = response.json()
 
     puzzle = data["puzzle"]
-
-    solution = data["solution"]
     
-    return [puzzle, solution]
+    return puzzle

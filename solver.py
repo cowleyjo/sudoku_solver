@@ -2,6 +2,7 @@ from api_call import api_call
 import random
 import os
 import time
+import copy
 
 start_time = time.time()
 
@@ -188,21 +189,41 @@ def update_cell(x, y, val, highlight=False):
 def attempt_box(x, y, val, puzzle):
     puzzle[x][y] = str(val)
     update_cell(x, y, str(val), True)
-    time.sleep(0.01)
+    # time.sleep(0.01)
     return check_sudoku(x, y, puzzle)
 
 
-def main():
-    list = api_call()
-    puzzle = list[0]
-    solution = list[1]
+def unique_solve(puzzle):
     clear()
     print_sudoku_initial(puzzle)
     allowed_indices = preprocess(puzzle)
+    first_solution = None
 
     curr = 0
 
+    solution_count = 0
+
     while True:
+        if (curr < 0):
+            break
+
+        if (curr == len(allowed_indices)):
+            solution_count += 1
+
+            if solution_count == 1:
+                first_solution = copy.deepcopy(puzzle)
+            
+            if solution_count > 1:
+                return [False, first_solution]
+
+            curr -= 1
+            while curr >= 0 and int(puzzle[allowed_indices[curr][0]][allowed_indices[curr][1]]) == 9:
+                puzzle[allowed_indices[curr][0]][allowed_indices[curr][1]] = "0"
+                update_cell(allowed_indices[curr][0], allowed_indices[curr][1], ".", False)
+                curr -= 1
+            if curr < 0:
+                break
+        
         index = allowed_indices[curr]
 
         starting_num = int(puzzle[index[0]][index[1]])
@@ -234,12 +255,6 @@ def main():
                 puzzle[allowed_indices[curr][0]][allowed_indices[curr][1]] = "0"
                 update_cell(allowed_indices[curr][0], allowed_indices[curr][1], ".", False)
                 curr -= 1
-        
-        if (curr == len(allowed_indices)):
-            break
 
-    if (puzzle == solution):
-        print("\n\n")
-        print("Sudoku Complete")
-
-main()
+    # clear()
+    return [True, first_solution]
